@@ -1,6 +1,6 @@
-taf-spades 4.2.0-r1
+taf-spades 4.3.0-r1
 
-TAFFISH app for SPAdes v4.2.0, a genome assembler toolkit for
+TAFFISH app for SPAdes v4.3.0, a genome assembler toolkit for
 short-read isolate, single-cell, metagenomic, transcriptomic, plasmid,
 viral, biosynthetic, and related assembly modes.
 
@@ -37,14 +37,17 @@ Command mode:
   taf-spades binspreader --help
   taf-spades pathracer --help
   taf-spades spaligner --help
+  taf-spades splitter --help
 
 Common workflows:
   taf-spades -- --test -t 1
   taf-spades -1 reads_1.fq.gz -2 reads_2.fq.gz -t 8 -m 32 -o spades_out
   taf-spades spades.py --isolate -1 reads_1.fq.gz -2 reads_2.fq.gz -o out
+  taf-spades spades.py --frugal -1 reads_1.fq.gz -2 reads_2.fq.gz -o out
   taf-spades metaspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o meta_out
   taf-spades plasmidspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o plasmid_out
   taf-spades rnaspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o rna_out
+  taf-spades splitter graph.gfa slr_dataset.yaml splitter_out -Gblunt
 
 Packaged commands:
   spades.py, metaspades.py, plasmidspades.py, rnaspades.py,
@@ -53,7 +56,7 @@ Packaged commands:
   spades-ionhammer, spades-kmercount, spades-kmer-estimating,
   spades-read-filter, spades-gbuilder, spades-gmapper,
   spades-gsimplifier, spades-gfa-split, binspreader, pathracer,
-  pathracer-seq-fs, spaligner,
+  pathracer-seq-fs, spaligner, splitter,
   python3, bash, gzip, bzip2, xz.
 
 Inputs and outputs:
@@ -64,7 +67,7 @@ Inputs and outputs:
   graph files, params.txt, and spades.log.
 
 Platform:
-  Built from the official SPAdes v4.2.0 source release on Debian 12.
+  Built from the official SPAdes v4.3.0 source release on Debian 12.
   Native image builds are declared for linux/amd64 and linux/arm64.
 
 Boundaries:
@@ -73,11 +76,11 @@ Boundaries:
   long-read assemblers. This app does not download reads, databases, or
   references, and it does not run downstream assembly QC or annotation.
   Use separate tools such as quast, seqkit, bandage-ng, or busco as needed.
-  hpcSPAdes is not included because it needs MPI; direct SRA input support
-  is not enabled because the source build leaves the NCBI SDK option off.
-  Upstream SPAdes 4.2.0 writes --test output to spades_test/ and rejects
-  combining --test with -o.
+  SPAdes 4.3.0 adds --frugal and the SPlitteR splitter tool. hpcSPAdes is
+  not included because it needs MPI; direct SRA input support is not enabled
+  because the source build leaves the NCBI SDK option off. Upstream SPAdes
+  writes --test output to spades_test/ and rejects combining --test with -o.
 
 Smoke:
-  Smoke validates version/help, major helper commands, missing shared-library
-  checks, and the official spades.py --test path with one thread.
+  Smoke validates version/help, --frugal, splitter help, major helper commands,
+  missing shared-library checks, and the official spades.py --test path.

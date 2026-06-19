@@ -8,11 +8,11 @@ biosynthetic gene clusters, and related short-read assembly modes.
 
 - name: `spades`
 - command: `taf-spades`
-- TAFFISH version: `4.2.0-r1`
+- TAFFISH version: `4.3.0-r1`
 - kind: `tool`
-- container image: `ghcr.io/taffish/spades:4.2.0-r1`
-- upstream: SPAdes `v4.2.0`
-- runtime version: `SPAdes genome assembler v4.2.0`
+- container image: `ghcr.io/taffish/spades:4.3.0-r1`
+- upstream: SPAdes `v4.3.0`
+- runtime version: `SPAdes genome assembler v4.3.0`
 - default command: `spades.py`
 - TAFFISH app license: Apache-2.0
 - upstream license: GPL-2.0-only
@@ -27,7 +27,7 @@ taf-spades --help
 The app uses a thin TAFFISH container wrapper:
 
 ```taf
-<taf-app:container:ghcr.io/taffish/spades:4.2.0-r1>
+<taf-app:container:ghcr.io/taffish/spades:4.3.0-r1>
 spades.py ::*ARGV*::
 ```
 
@@ -51,6 +51,7 @@ taf-spades spades-kmercount --help
 taf-spades binspreader --help
 taf-spades pathracer --help
 taf-spades spaligner --help
+taf-spades splitter --help
 ```
 
 ## Common Workflows
@@ -61,7 +62,7 @@ Run the official SPAdes installation test:
 taf-spades -- --test -t 1
 ```
 
-SPAdes writes this official test to `spades_test/`; upstream 4.2.0 rejects
+SPAdes writes this official test to `spades_test/`; upstream 4.3.0 rejects
 using `--test` together with `-o`.
 
 Assemble paired-end Illumina reads:
@@ -80,14 +81,16 @@ Run selected SPAdes modes:
 
 ```bash
 taf-spades spades.py --isolate -1 reads_1.fq.gz -2 reads_2.fq.gz -o isolate_out
+taf-spades spades.py --frugal -1 reads_1.fq.gz -2 reads_2.fq.gz -o frugal_out
 taf-spades metaspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o meta_out
 taf-spades plasmidspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o plasmid_out
 taf-spades rnaspades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o rna_out
+taf-spades splitter assembly_graph.gfa slr_dataset.yaml splitter_out -Gblunt
 ```
 
 ## Packaged Commands
 
-The image is built from the official SPAdes `v4.2.0` source release and places
+The image is built from the official SPAdes `v4.3.0` source release and places
 `/opt/spades/bin` on `PATH`. It includes:
 
 - pipeline front ends: `spades.py`, `metaspades.py`, `plasmidspades.py`,
@@ -98,11 +101,19 @@ The image is built from the official SPAdes `v4.2.0` source release and places
   `spades-kmer-estimating`, `spades-read-filter`, `spades-gbuilder`,
   `spades-gmapper`, `spades-gsimplifier`, `spades-gfa-split`
 - additional non-MPI SPAdes toolkit projects: `binspreader`, `pathracer`,
-  `pathracer-seq-fs`, `spaligner`
+  `pathracer-seq-fs`, `spaligner`, `splitter`
 - runtime tools: `python3`, `bash`, `gzip`, `bzip2`, `xz`
 
 The build keeps SPAdes installed files, bundled configs, HMM resources,
-pipeline Python modules, and official test datasets under `/opt/spades`.
+pipeline Python modules, SPlitteR support files, and official test datasets
+under `/opt/spades`.
+
+SPAdes 4.3.0 adds the memory-saving `--frugal` mode and the SPlitteR module for
+improving PacBio HiFi assemblies with synthetic long reads. It also improves
+overall RAM consumption, introduces clearer exit-code/error handling, fixes
+gzipped GFA reading on ARM/Linux platforms, and carries hpcSPAdes/grid-engine
+fixes upstream. This TAFFISH package includes the non-MPI `splitter` executable
+but continues to leave MPI hpcSPAdes out of the core tool image.
 
 ## Inputs and Outputs
 
@@ -141,11 +152,12 @@ annotation, binning QC, or visualization; combine it with other TAFFISH apps
 such as `quast`, `seqkit`, `bandage-ng`, or `busco` as needed.
 
 The app builds the default SPAdes projects plus `binspreader`, `pathracer`,
-and `spaligner`. It does not include `hpcSPAdes`, because that target requires
-an MPI-enabled cluster-style runtime that should be packaged and documented
-separately if needed. Direct NCBI SRA input support is also not enabled because
-the upstream source build keeps `SPADES_USE_NCBISDK` disabled by default; use
-FASTQ/FASTA inputs or convert SRA data explicitly before running this app.
+`spaligner`, and `splitter`. It does not include `hpcSPAdes`, because that
+target requires an MPI-enabled cluster-style runtime that should be packaged
+and documented separately if needed. Direct NCBI SRA input support is also not
+enabled because the upstream source build keeps `SPADES_USE_NCBISDK` disabled
+by default; use FASTQ/FASTA inputs or convert SRA data explicitly before
+running this app.
 
 Large real assemblies require substantial memory and disk. The smoke test only
 validates installation, helper availability, dynamic libraries, and the
@@ -156,8 +168,9 @@ resource scaling.
 
 Smoke checks verify:
 
-- SPAdes version file and `spades.py --version` report `4.2.0`.
+- SPAdes version file and `spades.py --version` report `4.3.0`.
 - main pipeline help and selected mode help pages are present.
+- new `--frugal` help text and the `splitter` help path are present.
 - core binaries and helper tools exist and have no missing shared libraries.
 - the official `spades.py --test -t 1` path writes non-empty `contigs.fasta`
   and `scaffolds.fasta`.
@@ -167,9 +180,9 @@ Smoke checks verify:
 
 - homepage and manual: <https://ablab.github.io/spades/>
 - repository: <https://github.com/ablab/spades>
-- release: <https://github.com/ablab/spades/releases/tag/v4.2.0>
-- source download: <https://github.com/ablab/spades/releases/download/v4.2.0/SPAdes-4.2.0.tar.gz>
-- source SHA256 used by this app: `043322129f8536411f1172b7d1c9adfcb6d49d152c10066ccc03e86b6f615a6b`
+- release: <https://github.com/ablab/spades/releases/tag/v4.3.0>
+- source download: <https://github.com/ablab/spades/releases/download/v4.3.0/SPAdes-4.3.0.tar.gz>
+- source SHA256 used by this app: `09671ca39f9c6d2479d9fc168100bfd089b4a24002d51b815386d2b24d424456`
 
 If you use SPAdes in research, cite Prjibelski et al. 2020 and the relevant
 mode-specific SPAdes publications listed in the upstream README/manual.

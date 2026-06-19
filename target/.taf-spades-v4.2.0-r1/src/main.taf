@@ -1,2 +1,0 @@
-<taf-app:container:ghcr.io/taffish/spades:4.2.0-r1>
-spades.py ::*ARGV*::
